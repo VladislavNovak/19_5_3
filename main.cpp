@@ -16,24 +16,63 @@ bool isFileExist(const char* fileName) {
     fileReader.open(fileName);
     if (fileReader.is_open() && !fileReader.bad()) isExist = true;
     fileReader.close();
+
     return isExist;
 }
 
-int main() {
-    SetConsoleCP(65001);
-    SetConsoleOutputCP(65001);
+int getCalculatedSalary(const vector<vector<string>> &dataBase) {
+    const int SALARY = 2;
+    int totalSum = 0;
 
-    const char* pathName = R"(..\test.txt)";
-
-    if (!isFileExist(pathName)) {
-        printf("Неверное расположение файла (%s). Переместите в директорию с исполняемым файлом!", pathName);
-        return 0;
+    for (auto record : dataBase) {
+        if (record.size() >= (SALARY + 1)) {
+            totalSum += stoi(record[SALARY]);
+        }
     }
 
+    return totalSum;
+}
+
+int getHighestSalaryPerson(const vector<vector<string>> &dataBase) {
+    const int SALARY = 2;
+    int highestSalaryPerson = 0;
+
+    for (int i = 0; i < dataBase.size(); ++i) {
+        auto record = dataBase[i];
+
+        if (record.size() >= (SALARY + 1)) {
+            if (stoi(dataBase[highestSalaryPerson][SALARY]) < stoi(record[SALARY])) {
+                highestSalaryPerson = i;
+            }
+        }
+    }
+
+    return highestSalaryPerson;
+}
+
+void printData(const vector<vector<string>> &dataBase, int totalSalary, int highestSalaryPerson) {
+    cout << "Полный список данных: " << endl;
+    for (int i = 0; i < dataBase.size(); ++i) {
+        auto record = dataBase[i];
+        cout << i << ": ";
+        for (const auto &item : record) cout << item << " ";
+
+        cout << endl;
+    }
+
+    cout << endl;
+
+    cout << "Заработный фонд: " << totalSalary << endl;
+    cout << "Максимальная зарплата у: ";
+    for (auto &item : dataBase[highestSalaryPerson]) {
+        cout << item << " ";
+    }
+
+    cout << endl;
+}
+
+void readFileToData(const char* pathName, vector<vector<string>> &dataBase) {
     string textLine;
-    int totalSum = 0;
-    int nameOfWinner = 0;
-    vector<vector<string>> dataBase;
 
     std::ifstream fileReader;
     fileReader.open(pathName);
@@ -49,30 +88,22 @@ int main() {
     }
 
     fileReader.close();
+}
 
-    for (int i = 0; i < dataBase.size(); ++i) {
-        auto record = dataBase[i];
-        int recordSize = (int)record.size();
+int main() {
+    SetConsoleCP(65001);
+    SetConsoleOutputCP(65001);
 
-        if (recordSize >= 3) {
-            totalSum += stoi(record[2]);
+    const char* pathName = R"(..\test.txt)";
 
-            if (stoi(dataBase[nameOfWinner][2]) < stoi(record[2])) {
-                nameOfWinner = i;
-            }
-        }
+    if (!isFileExist(pathName)) {
+        printf("Неверное расположение файла (%s). Переместите в директорию с исполняемым файлом!", pathName);
+        return 0;
     }
 
-    cout << "Полный список данных: " << endl;
-    for (auto &record : dataBase) {
-        int recordSize = (int)record.size();
-        cout << recordSize << ": ";
-        for (auto &item : record) {
-            cout << item << " ";
-        }
-        cout << endl;
-    }
+    vector<vector<string>> dataBase;
 
-    cout << "Заработный фонд: " << totalSum << endl;
-    cout << "Максимальная зарплата у: " << dataBase[nameOfWinner][0] << " " << dataBase[nameOfWinner][1] << " " << dataBase[nameOfWinner][2] << endl;
+    readFileToData(pathName, dataBase);
+
+    printData(dataBase, getCalculatedSalary(dataBase), getHighestSalaryPerson(dataBase));
 }
