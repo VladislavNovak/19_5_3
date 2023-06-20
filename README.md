@@ -19,7 +19,7 @@ Sally Field 15600 15.8.2021
 Michael Humphreys 29400 23.5.2020
 ```
 
-## <font color="#tomato>Примечание</font>
+## <font color="#tomato">Примечание</font>
 
 Для того чтобы сосредоточиться на сути задачи, не используются проверки и выбор файла. 
 Всё это реализовано в [19_5_2](https://github.com/VladislavNovak/19_5_2). 
