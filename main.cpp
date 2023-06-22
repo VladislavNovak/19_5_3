@@ -10,16 +10,6 @@ using std::endl;
 using std::string;
 using std::vector;
 
-bool isFileExist(const char* fileName) {
-    bool isExist = false;
-    std::ifstream fileReader;
-    fileReader.open(fileName);
-    if (fileReader.is_open() && !fileReader.bad()) isExist = true;
-    fileReader.close();
-
-    return isExist;
-}
-
 int getCalculatedSalary(const vector<vector<string>> &dataBase) {
     const int SALARY = 2;
     int totalSum = 0;
@@ -71,23 +61,59 @@ void printData(const vector<vector<string>> &dataBase, int totalSalary, int high
     cout << endl;
 }
 
-void readFileToData(const char* pathName, vector<vector<string>> &dataBase) {
-    string textLine;
+// Обрезаем с начала и с конца все НЕ символы
+std::string trim(std::string const &str, std::string const &whitespace=" \r\n\t\v\f") {
+    auto start = str.find_first_not_of(whitespace);
+    auto end = str.find_last_not_of(whitespace);
 
-    std::ifstream fileReader;
-    fileReader.open(pathName);
+    return str.substr(start, end - start + 1);
+}
 
-    while (std::getline(fileReader, textLine)) {
-        std::stringstream ss(textLine);
-        vector<string> words;
-        string word;
+// Записывает в data данные из файла по принципу: массив строк.
+// Возвращает true, если чтение прошло успешно
+bool readFileToVector(const char* pathName, vector<string> &data) {
+    bool isFileReadSuccessfully = false;
+    std::ifstream in(pathName);
 
-        while (ss >> word) words.push_back(word);
+    if (in.is_open() && !in.bad()) {
+        string textLine;
 
-        dataBase.push_back(words);
+        while (std::getline(in, textLine)) {
+            data.push_back(textLine);
+        }
+
+        in.clear();
+        in.seekg(0, std::ios_base::beg);
+        isFileReadSuccessfully = true;
     }
 
-    fileReader.close();
+    in.close();
+
+    return isFileReadSuccessfully;
+}
+
+// Записывает в data данные из файла по принципу: массив строк <- массив слов.
+bool readFileToVectorOfVectors(const char* pathName, vector<vector<string>> &data) {
+    vector<string> rows;
+    bool isFileReadSuccessfully = readFileToVector(pathName, rows);
+
+    if (isFileReadSuccessfully && !rows.empty()) {
+        for (const auto &row : rows) {
+            vector<string> words;
+            string word;
+            std::stringstream ss(row);
+
+            // Делим строки на токены по запятой
+            while (std::getline(ss, word, ' ')) {
+                string retStr = trim(word);
+                words.push_back(retStr);
+            }
+
+            data.push_back(words);
+        }
+    }
+
+    return isFileReadSuccessfully;
 }
 
 int main() {
@@ -96,14 +122,14 @@ int main() {
 
     const char* pathName = R"(..\test.txt)";
 
-    if (!isFileExist(pathName)) {
-        printf("Неверное расположение файла (%s). Переместите в директорию с исполняемым файлом!", pathName);
-        return 0;
-    }
-
     vector<vector<string>> dataBase;
 
-    readFileToData(pathName, dataBase);
+    bool isFileExist = readFileToVectorOfVectors(pathName, dataBase);
+
+    if (!isFileExist) {
+        printf("Неверное расположение файла (%s). Переместите в директорию с исполняемым файлом!", pathName);
+        return 1;
+    }
 
     printData(dataBase, getCalculatedSalary(dataBase), getHighestSalaryPerson(dataBase));
 }
